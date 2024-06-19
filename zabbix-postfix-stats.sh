@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-MAILLOG=/var/log/mail.log
+MAILLOG=/var/log/maillog
 PFOFFSETFILE=/tmp/zabbix-postfix-offset.dat
 PFSTATSFILE=/tmp/postfix_statsfile.dat
 TEMPFILE=$(mktemp)
 PFLOGSUMM=/usr/sbin/pflogsumm
-PYGTAIL=/usr/sbin/pygtail.py
+PYGTAIL=/usr/lib/python3/dist-packages/pygtail/core.py
 
 # list of values we are interested in
 PFVALS=( 'received' 'delivered' 'forwarded' 'deferred' 'bounced' 'rejected' 'held' 'discarded' 'reject_warnings' 'bytes_received' 'bytes_delivered' )
@@ -24,7 +24,7 @@ if [ ! -x ${PFLOGSUMM} ] ; then
         exit 1
 fi
 
-if [ ! -x ${PYGTAIL} ] ; then
+if [ ! -r ${PYGTAIL} ] ; then
         echo "ERROR: ${PYGTAIL} not found"
         exit 1
 fi
@@ -88,7 +88,7 @@ if [ -n "$1" ]; then
         readvalue "$1"
 else
         # read the new part of mail log and read it with pflogsumm to get the summary
-        "${PYGTAIL}" -o"${PFOFFSETFILE}" "${MAILLOG}" | "${PFLOGSUMM}" -h 0 -u 0 --no_bounce_detail --no_deferral_detail --no_reject_detail --no_smtpd_warnings --no_no_msg_size > "${TEMPFILE}" 2>/dev/null
+        python3 "${PYGTAIL}" -o"${PFOFFSETFILE}" "${MAILLOG}" | "${PFLOGSUMM}" -h 0 -u 0 --no_bounce_detail --no_deferral_detail --no_reject_detail --no_smtpd_warnings --no_no_msg_size > "${TEMPFILE}" 2>/dev/null
 
         if [ ! $? -eq 0 ]; then
                 result_text="ERROR: wrong exit code returned while running  \"${PYGTAIL}\" -o\"${PFOFFSETFILE}\" \"${MAILLOG}\" | \"${PFLOGSUMM}\" -h 0 -u 0 --no_bounce_detail --no_deferral_detail --no_reject_detail --no_smtpd_warnings --no_no_msg_size > \"${TEMPFILE}\" 2>/dev/null"

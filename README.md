@@ -12,13 +12,11 @@ Forked from http://admin.shamot.cz/?p=424
 # Installation
     # for Ubuntu / Debian
     apt-get install pflogsumm
+    apt-get install python3-pygtail
     
     # for CentOS
     yum install postfix-perl-scripts
-    
-    cp pygtail.py /usr/sbin/
-    chmod +x /usr/sbin/pygtail.py
-    
+        
     # ! check MAILLOG path in zabbix-postfix-stats.sh
     cp zabbix-postfix-stats.sh /usr/bin/
     chmod +x /usr/bin/zabbix-postfix-stats.sh
@@ -29,6 +27,9 @@ Forked from http://admin.shamot.cz/?p=424
     Defaults:zabbix !requiretty
     zabbix ALL=(ALL) NOPASSWD: /usr/bin/zabbix-postfix-stats.sh
     
+    # Or add zabbix to the adm group to read log files: 
+    usermod -a -G adm zabbix  
+        
     systemctl restart zabbix-agent
 
 Finally import template_app_zabbix.xml and attach it to your host
